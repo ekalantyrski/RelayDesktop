@@ -14,17 +14,18 @@ This class is in charge of accessing data in storage
  */
 public class DAL {
 
-    private static final String directory = "Contacts";
+    private static final String upperDirectory = "Data";
+    private static final String contactDirectory = upperDirectory + "/Contacts";
 
     //This class gets a list of contacts that were saved
     //Returns a list of contacts that were saved
     public static ArrayList<Contact> getContacts()
     {
         ArrayList<Contact> contacts = new ArrayList<>();
-        File folder = new File(directory);
+        File folder = new File(contactDirectory);
         if(folder.isDirectory())
         {
-            File[] listOfFiles = folder.listFiles(); // gets all files in directory
+            File[] listOfFiles = folder.listFiles(); // gets all files in contactDirectory
             for(int i = 0; i < listOfFiles.length; i++)
             {
                 if(listOfFiles[i].getName().endsWith(".txt")) // accept only files with txt
@@ -88,7 +89,7 @@ public class DAL {
     //Param is the contact to save
     public static void addContact(Contact contact)
     {
-        String fileName = directory + "/" + contact.getFirstName() + contact.getLastName() + ".txt";
+        String fileName = contactDirectory + "/" + contact.getFirstName() + contact.getLastName() + ".txt";
         File file = new File(fileName);
         try {
             file.createNewFile();
@@ -112,7 +113,7 @@ public class DAL {
     //Param is contact to append to and the message to append
     public static void addMessage(Contact contact, Message message)
     {
-        String fileName = directory + "/" + contact.getFirstName() + contact.getLastName() + ".txt";
+        String fileName = contactDirectory + "/" + contact.getFirstName() + contact.getLastName() + ".txt";
         File file = new File(fileName);
         try {
             PrintWriter pw = new PrintWriter(new FileOutputStream(file, true));
@@ -123,6 +124,64 @@ public class DAL {
 
         }
 
+    }
+    //Gets the password that is saved on disk
+    //If no password is found, returns null
+    public static String getPassword() {
+        File folder = new File(upperDirectory);
+        if (folder.isDirectory())
+        {
+            File file = new File(upperDirectory + "/password.txt");
+            if(file.isFile())
+            {
+                try
+                {
+                    BufferedReader br = new BufferedReader(new FileReader(upperDirectory + "/password.txt"));
+                    String password = br.readLine();
+                    return password;
+
+                }
+                catch(FileNotFoundException fnfe)
+                {
+                    System.out.println("File not found, even though it should be there");
+                }
+                catch(IOException ioe)
+                {
+                    System.out.println("An error has occured");
+                    ioe.printStackTrace();
+                }
+            }
+            else
+            {
+                try
+                {
+                    file.createNewFile();
+                }catch (IOException e)
+                {
+                    System.out.println("An error has occured");
+                    e.printStackTrace();
+                }
+            }
+        }
+        else
+        {
+            folder.mkdir();
+        }
+        return null; // if file or directory doesn't exist return null;
+    }
+
+    public static void setPassword(String password)
+    {
+        try
+        {
+            PrintWriter pw = new PrintWriter(new FileOutputStream(upperDirectory + "/password.txt"));
+            pw.print(password);
+            pw.flush();
+            pw.close();
+        }catch(FileNotFoundException fnfe)
+        {
+            System.out.println("File not found : password");
+        }
     }
 
 
