@@ -1,11 +1,15 @@
 package com.relay;
 
+import com.sun.codemodel.internal.JOp;
+import jdk.nashorn.internal.scripts.JO;
+
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Random;
 
 /*
 Contains most of the code that runs the program. Creates screen and all its components, as well as controls all io (network,text, mouse)
@@ -25,13 +29,15 @@ public class Screen implements ActionListener{
     private JScrollPane scrollPane;
     private Action keyboardAction;
     private boolean running;
+    private JMenuBar menuBar;
+    private String password;
+    private ConnectionPane connectionPane;
 
 
     public Screen()
     {
 
         contactList = DAL.getContacts();
-
 
         jframe = new JFrame();
         jframe.setSize(640, 450);
@@ -44,7 +50,6 @@ public class Screen implements ActionListener{
             public void actionPerformed(ActionEvent e) {
                 if(e.getSource() instanceof JTextArea)
                 {
-                    System.out.println("enter");
                     JTextArea area = (JTextArea)e.getSource();
                     String input = area.getText(); //the text inputted
                     addReceivedMessage(new Contact(selectedContact.getFirstName(), selectedContact.getLastName(), selectedContact.getPhoneNumber(), new Message(input, true)));
@@ -64,9 +69,6 @@ public class Screen implements ActionListener{
             }
         };
 
-
-//        ActionMap am = new ActionMap();
-//        am.put("Enter", keyboardAction);
         messagePane = new MessagePane(keyboardAction);
 
         contactListPane = new ContactListPane(this); // contacts
@@ -85,12 +87,13 @@ public class Screen implements ActionListener{
             messagePane.update();
         }
 
-
         splitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT);
         splitPane.setPreferredSize(new Dimension(640, 450));
         splitPane.setDividerLocation(0.3);
         splitPane.setResizeWeight(0);
-        splitPane.setRightComponent(messagePane);
+        password = checkPassword();
+        connectionPane = new ConnectionPane(password);
+        splitPane.setRightComponent(connectionPane);
         splitPane.setLeftComponent(scrollPane);
         splitPane.setDividerSize(1);
         splitPane.setEnabled(false);
@@ -105,17 +108,13 @@ public class Screen implements ActionListener{
         running = true;
         while(running) //if connection is lost, will listen for a new connection
         {
-            n = new Network("1234");
-            System.out.println("Done");
+            n = new Network(password);
+            System.out.println("Done searching for connection");
+            splitPane.setRightComponent(messagePane);
+            splitPane.validate();
             (new Thread(n)).start();
             listenNetwork();
         }
-
-
-
-
-
-
     }
 
     @Override
@@ -137,15 +136,14 @@ public class Screen implements ActionListener{
                 messagePane.update();
                 messagePane.revalidate();
             }
-
-
         }
     }
     //Polls the network every 10ms
     //If there is input, then it adds the received mesage to proper area
     private void listenNetwork()
     {
-        while(true)
+        boolean continueListening = true;
+        while(continueListening)
         {
             Contact input = null;
             input = n.getNextContact();
@@ -157,7 +155,7 @@ public class Screen implements ActionListener{
             }
             else if(!n.isOpen())
             {
-                break;
+                continueListening = false;
             }
             try
             {
@@ -166,10 +164,7 @@ public class Screen implements ActionListener{
             {
 
             }
-
-
         }
-
     }
 
     //sends a text over network to phone
@@ -187,7 +182,6 @@ public class Screen implements ActionListener{
         if(selectedContact != null && contact.equals(selectedContact)) // if current contact gets a message, adds a message
         {
             selectedContact.addMessage(contact.getFirstMessage());
-            //messagePane.addMessage(contact.getFirstMessage());
             messagePane.update();
             jframe.revalidate();
         }
@@ -227,6 +221,46 @@ public class Screen implements ActionListener{
                 contactList.get(contactIndex).addMessage(contact.getFirstMessage());
             }
         }
+    }
+
+
+    public String checkPassword()
+    {
+
+        //TODO Create a new pane that will be put into the splitpane, with more detailed instructions on connection to phone
+        String password = DAL.getPassword();
+        if(password == null) // then no password stored
+        {
+            password = generatePassword();
+            DAL.setPassword(password);
+        }
+        return password;
+    }
+
+    /**
+     * Creates a 10 character random password of lower and capital case letters
+     * 52^10 possibiltiies
+     *
+     * @return String
+     */
+    private String generatePassword()
+    {
+        Random rand = new Random();
+        StringBuilder sb = new StringBuilder();
+        int n;
+        for(int i = 0; i < 10; i++)
+        {
+            n = rand.nextInt(52);
+            if(n < 26) // then upper case char
+            {
+                sb.append((char)(n + 65));
+            }
+            else // lower case char
+            {
+                sb.append((char)(n + 71));
+            }
+        }
+        return sb.toString();
     }
 
 

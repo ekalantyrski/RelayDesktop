@@ -44,7 +44,6 @@ public class MessageView extends JPanel {
         super.paintComponent(g);
         g.setColor(ContactButton.GREY);
         int greatestHeight = Math.max(HEIGHT, (amountOfLines*lineHeight + messages.size()*heightBetweenMessages) + topOffset);
-        System.out.println(greatestHeight);
         g.fillRect(0,0, WIDTH, greatestHeight);
         g.setColor(Color.BLACK);
 

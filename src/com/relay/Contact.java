@@ -66,11 +66,11 @@ public class Contact implements Serializable, Comparable<Contact>{
     //Returns true if equal
     public boolean equals(Contact contact)
     {
-        if(contact.getPhoneNumber() != phoneNumber)
+        if(!contact.getPhoneNumber().equals(phoneNumber))
             return false;
-        if(contact.getFirstName() != firstName)
+        if(!contact.getFirstName().equals(firstName))
             return false;
-        if(contact.getLastName() != lastName)
+        if(!contact.getLastName().equals(lastName))
             return false;
         return true;
     }

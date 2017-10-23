@@ -172,6 +172,7 @@ public class DAL {
 
     public static void setPassword(String password)
     {
+
         try
         {
             PrintWriter pw = new PrintWriter(new FileOutputStream(upperDirectory + "/password.txt"));

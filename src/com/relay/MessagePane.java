@@ -73,8 +73,6 @@ public class MessagePane extends JPanel {
         messageScroll.repaint();
         JScrollBar bar = messageScroll.getVerticalScrollBar();
         bar.setValue(bar.getMinimum());
-        System.out.println(bar.getMaximum());
-        System.out.println(bar.getVisibleAmount());
         bar.setValue(bar.getMaximum() - bar.getVisibleAmount());
 
     }

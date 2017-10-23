@@ -7,7 +7,6 @@ import java.io.Serializable;
  */
 
 /*
-
 Holds info on a message
  */
 
