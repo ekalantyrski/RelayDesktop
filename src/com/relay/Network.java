@@ -19,7 +19,7 @@ public class Network implements Runnable{
     private ObjectInputStream in;
     private ObjectOutputStream out;
     private final static int port = 43567;
-    private Queue<Contact> messageList;
+    private Queue<LocalMessage> messageList;
     private String password;
     private boolean running;
     private boolean open = false;
@@ -85,11 +85,11 @@ public class Network implements Runnable{
     //The network loop that listens for input, if there is input, adds that to a queue that is then polled for the message
     public void run() {
         running = true;
-        Contact input = null;
+        LocalMessage input = null;
         while (running) {
             if (open) {
                 try {
-                    input = (Contact) in.readObject(); // waits for input
+                    input = (LocalMessage) in.readObject(); // waits for input
                     messageList.add(input);
                     input = null;
                 } catch (ClassNotFoundException cnfe) {
@@ -98,6 +98,7 @@ public class Network implements Runnable{
                     running = false;
                     break;
                 } catch (IOException ioe) {
+                    ioe.printStackTrace();
                     System.out.println("Connection lost");
                     open = false;
                     running = false;
@@ -123,17 +124,17 @@ public class Network implements Runnable{
     }
     //Returns the contact at head of queue
     //Return is the contact at head
-    public Contact getNextContact()
+    public LocalMessage getNextLocalMessage()
     {
         return messageList.poll();
     }
     //Sends a contact over the network to the phone
     //Param is the contact to send
-    public void send(Contact contact)
+    public void send(LocalMessage localMessage)
     {
         try
         {
-            out.writeObject(contact);
+            out.writeObject(localMessage);
         }
         catch(IOException e)
         {

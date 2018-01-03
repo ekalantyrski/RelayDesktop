@@ -1,10 +1,12 @@
 package com.relay;
 
 import javax.swing.*;
+import javax.swing.table.DefaultTableCellRenderer;
+import javax.swing.text.DefaultCaret;
 import java.awt.*;
-import java.awt.event.ActionListener;
+import java.awt.event.AdjustmentEvent;
+import java.awt.event.AdjustmentListener;
 import java.awt.event.KeyEvent;
-import java.util.ArrayList;
 
 /**
  * Created by erickalantyrski on 2017-06-06.
@@ -15,10 +17,10 @@ import java.util.ArrayList;
 This is the overal component that has the textbox and the messages of a contact
  */
 
-public class MessagePane extends JPanel {
+public class MessagesPane extends JPanel {
     public static final int WIDTH = 448;
     public static final int HEIGHT = 450;
-    private MessageView messageView;
+    private MessagesView messageView;
     private JScrollPane messageScroll;
     private MessageTextBox messageTextBox;
     private Action keyboardAction;
@@ -26,17 +28,18 @@ public class MessagePane extends JPanel {
     private String m2 = "Hello my name is not Eric, what is not up? Because I am up doing this awesome project.";
 
 
-    public MessagePane(Action keyboardAction)
+    public MessagesPane(Action keyboardAction)
     {
         this.keyboardAction = keyboardAction;
 
         setLayout(new BorderLayout(0,0));
         messageTextBox = new MessageTextBox();
 
-        messageView= new MessageView();
+        messageView= new MessagesView();
         messageTextBox.getActionMap().put("Enter", keyboardAction); //this code adds the listener to the textbox
         messageTextBox.getInputMap(JLabel.WHEN_FOCUSED).put(KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0), "Enter");
         messageScroll = new JScrollPane(messageView);
+        messageScroll.getVerticalScrollBar().setUnitIncrement(12);
         messageScroll.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
 
 
@@ -69,11 +72,13 @@ public class MessagePane extends JPanel {
 
         revalidate();
         repaint();
-        messageView.repaint();
-        messageScroll.repaint();
-        JScrollBar bar = messageScroll.getVerticalScrollBar();
-        bar.setValue(bar.getMinimum());
-        bar.setValue(bar.getMaximum() - bar.getVisibleAmount());
+
+        //set scrollbar to very bottom
+        messageScroll.getVerticalScrollBar().addAdjustmentListener(new AdjustmentListener() {
+            public void adjustmentValueChanged(AdjustmentEvent e) {
+                e.getAdjustable().setValue(e.getAdjustable().getMaximum());
+            }
+        });
 
     }
     //Switches the messagePane to a new contact

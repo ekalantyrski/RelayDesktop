@@ -13,8 +13,8 @@ public class ConnectionPane extends JPanel{
     Has the randomly generated password and
     where to put the password
      */
-    private static final int WIDTH = MessagePane.WIDTH;
-    private static final int HEIGHT = MessagePane.HEIGHT;
+    private static final int WIDTH = MessagesPane.WIDTH;
+    private static final int HEIGHT = MessagesPane.HEIGHT;
     public static final Font font = new Font("Georgia", Font.PLAIN, 20);
 
 

@@ -1,8 +1,5 @@
 package com.relay;
 
-import com.sun.codemodel.internal.JOp;
-import jdk.nashorn.internal.scripts.JO;
-
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
@@ -19,9 +16,10 @@ Contains most of the code that runs the program. Creates screen and all its comp
  * Created by erickalantyrski on 2017-05-11.
  */
 public class Screen implements ActionListener{
+    public static final Font font = new Font("Arial", Font.PLAIN, 12);
     private JFrame jframe;
     private Network n;
-    private MessagePane messagePane;
+    private MessagesPane messagePane;
     private ArrayList<Contact> contactList;
     private Contact selectedContact = null;
     private ContactListPane contactListPane;
@@ -40,6 +38,7 @@ public class Screen implements ActionListener{
         contactList = DAL.getContacts();
 
         jframe = new JFrame();
+        jframe.setFont(font);
         jframe.setSize(640, 450);
         jframe.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         jframe.setResizable(false);
@@ -52,15 +51,15 @@ public class Screen implements ActionListener{
                 {
                     JTextArea area = (JTextArea)e.getSource();
                     String input = area.getText(); //the text inputted
-                    addReceivedMessage(new Contact(selectedContact.getFirstName(), selectedContact.getLastName(), selectedContact.getPhoneNumber(), new Message(input, true)));
+                    Message m = new Message(input, true);
+                    Contact c = new Contact(selectedContact.getFirstName(), selectedContact.getLastName(), selectedContact.getPhoneNumber(), m);
+                    SmsMessage message = new SmsMessage(c);
+                    addReceivedMessage(message);
                     messagePane.update();
                     if((selectedContact != null && n != null) && n.isOpen())
                     {
-                        Contact contact = new Contact(selectedContact.getFirstName(), // creates object to be sent to phone
-                                selectedContact.getLastName(),
-                                selectedContact.getPhoneNumber(),
-                                new Message(input));
-                        sendText(contact);
+
+                        sendText(message);
 
                     }
                     jframe.revalidate();
@@ -69,7 +68,7 @@ public class Screen implements ActionListener{
             }
         };
 
-        messagePane = new MessagePane(keyboardAction);
+        messagePane = new MessagesPane(keyboardAction);
 
         contactListPane = new ContactListPane(this); // contacts
         contactListPane.addListOfContacts(contactList);
@@ -145,18 +144,19 @@ public class Screen implements ActionListener{
         boolean continueListening = true;
         while(continueListening)
         {
-            Contact input = null;
-            input = n.getNextContact();
-            if(input != null)
-            {
-                addReceivedMessage(input);
-                input = null;
+            LocalMessage input = null;
+            input = n.getNextLocalMessage();
+            if (input != null) {
+                if(input.getMessageType() == MessageType.SMS)
+                {
+                    addReceivedMessage((SmsMessage) input);
+                    input = null;
+                }
 
-            }
-            else if(!n.isOpen())
-            {
+            } else if (!n.isOpen()) {
                 continueListening = false;
             }
+
             try
             {
                 Thread.sleep(10);
@@ -164,24 +164,28 @@ public class Screen implements ActionListener{
             {
 
             }
+
         }
     }
 
     //sends a text over network to phone
     //Param is the object to be sent
-    public void sendText(Contact contact)
+    public void sendText(SmsMessage message)
     {
-        n.send(contact);
+        n.send(message);
     }
     //This method adds the message to proper area
     // It will either add to current view, create a new contact and add that contact to contactList, or add message to a contact not in view
     //Param is the contact to add
-    public void addReceivedMessage(Contact contact)
+    public void addReceivedMessage(SmsMessage smsMessage)
     {
         System.out.println("Added message");
+        Contact contact = smsMessage.getContact();
+        Message message = smsMessage.getMessage();
         if(selectedContact != null && contact.equals(selectedContact)) // if current contact gets a message, adds a message
         {
-            selectedContact.addMessage(contact.getFirstMessage());
+            selectedContact.addMessage(message);
+            messagePane.addMessage(message);
             messagePane.update();
             jframe.revalidate();
         }
@@ -196,7 +200,7 @@ public class Screen implements ActionListener{
                 {
                     selectedContact = contact;
                     DAL.addContact(contact);
-                    DAL.addMessage(contact, contact.getFirstMessage());
+                    DAL.addMessage(contact, message);
 
 
                     contactListPane.addContact(contact, true);
@@ -211,14 +215,14 @@ public class Screen implements ActionListener{
                 {
                     contactListPane.addContact(contact, contactPosition);
                     DAL.addContact(contact);
-                    DAL.addMessage(contact, contact.getFirstMessage());
+                    DAL.addMessage(contact, message);
                     splitPane.setLeftComponent(scrollPane);
                     splitPane.repaint();
                 }
             }
             else // if message received is for an existing contact, that is not selected
             {
-                contactList.get(contactIndex).addMessage(contact.getFirstMessage());
+                contactList.get(contactIndex).addMessage(message);
             }
         }
     }
