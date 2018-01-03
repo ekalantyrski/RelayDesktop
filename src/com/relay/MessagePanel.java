@@ -66,7 +66,7 @@ public class MessagePanel extends JPanel {
             g.setColor(Color.WHITE);
             for(int i = 0; i < lines.length; i++)
             {
-                g.drawString(lines[i], userSentMessageStart + 5, verticalPadding + (i*(lineHeight + 2)) + lineHeight);
+                g.drawString(lines[i], userSentMessageStart + 5, verticalPadding + ((i+1)*(lineHeight + 2)));
             }
         }
         else
@@ -76,7 +76,7 @@ public class MessagePanel extends JPanel {
             g.setColor(Color.BLACK);
             for(int i = 0; i < lines.length; i++)
             {
-                g.drawString(lines[i], userReceivedMessageStart + 5, verticalPadding + (i*(lineHeight + 2)) + lineHeight);
+                g.drawString(lines[i], userReceivedMessageStart + 5, verticalPadding + ((i+1)*(lineHeight + 2)));
             }
         }
 

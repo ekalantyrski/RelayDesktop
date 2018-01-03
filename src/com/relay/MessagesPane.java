@@ -24,8 +24,6 @@ public class MessagesPane extends JPanel {
     private JScrollPane messageScroll;
     private MessageTextBox messageTextBox;
     private Action keyboardAction;
-    private String m1 = "Hello my name is Eric, what is up?";
-    private String m2 = "Hello my name is not Eric, what is not up? Because I am up doing this awesome project.";
 
 
     public MessagesPane(Action keyboardAction)
@@ -64,22 +62,14 @@ public class MessagesPane extends JPanel {
     public void addMessage(Message message)
     {
         messageView.addMessage(message);
-        update();
     }
     //Repaints current component and the messageview component
     public void update()
     {
-
-        revalidate();
+        this.revalidate();
+        messageView.revalidate();
         repaint();
-
-        //set scrollbar to very bottom
-        messageScroll.getVerticalScrollBar().addAdjustmentListener(new AdjustmentListener() {
-            public void adjustmentValueChanged(AdjustmentEvent e) {
-                e.getAdjustable().setValue(e.getAdjustable().getMaximum());
-            }
-        });
-
+        scrollDown();
     }
     //Switches the messagePane to a new contact
     //Param is the contact to switch to
@@ -87,6 +77,20 @@ public class MessagesPane extends JPanel {
     {
         messageView.addNewMessages(contact.getMessages());
         update();
+    }
+
+    public void scrollDown()
+    {
+        JScrollBar verticalBar = messageScroll.getVerticalScrollBar();
+        AdjustmentListener downScroller = new AdjustmentListener() {
+            @Override
+            public void adjustmentValueChanged(AdjustmentEvent e) {
+                Adjustable adjustable = e.getAdjustable();
+                adjustable.setValue(adjustable.getMaximum());
+                verticalBar.removeAdjustmentListener(this);
+            }
+        };
+        verticalBar.addAdjustmentListener(downScroller);
     }
 
 }

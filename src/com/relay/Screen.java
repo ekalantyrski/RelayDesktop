@@ -55,7 +55,6 @@ public class Screen implements ActionListener{
                     Contact c = new Contact(selectedContact.getFirstName(), selectedContact.getLastName(), selectedContact.getPhoneNumber(), m);
                     SmsMessage message = new SmsMessage(c);
                     addReceivedMessage(message);
-                    messagePane.update();
                     if((selectedContact != null && n != null) && n.isOpen())
                     {
 
@@ -83,7 +82,7 @@ public class Screen implements ActionListener{
             {
                 messagePane.addMessage(messageList.get(i));
             }
-            messagePane.update();
+            messagePane.scrollDown();
         }
 
         splitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT);
@@ -132,8 +131,6 @@ public class Screen implements ActionListener{
                 selectedContact = c.getContact();
                 messagePane.switchContact(selectedContact);
                 contactListPane.repaint();
-                messagePane.update();
-                messagePane.revalidate();
             }
         }
     }
@@ -186,7 +183,6 @@ public class Screen implements ActionListener{
         {
             selectedContact.addMessage(message);
             messagePane.addMessage(message);
-            messagePane.update();
             jframe.revalidate();
         }
         else

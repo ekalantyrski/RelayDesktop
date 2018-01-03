@@ -31,8 +31,9 @@ public class MessagesView extends JPanel {
     public void addNewMessages(ArrayList<Message> messages)
     {
         this.removeAll();
-        setPreferredSize(getPreferredSize());
+
         this.messages = messages;
+        amountOfMessages = 0;
         for(int i = 0; i < messages.size(); i++)
         {
             MessagePanel mPanel = new MessagePanel(messages.get(i));
@@ -41,23 +42,6 @@ public class MessagesView extends JPanel {
         amountOfMessages = messages.size();
     }
 
-//    @Override
-//    public void paintComponent(Graphics g)
-//    {
-//
-//        super.paintComponent(g);
-//        g.setColor(ContactButton.GREY);
-//        int greatestHeight = Math.max(HEIGHT, (amountOfLines*lineHeight + messages.size()*heightBetweenMessages) + topOffset);
-//        g.fillRect(0,0, WIDTH, greatestHeight);
-//        g.setColor(Color.BLACK);
-//
-//        amountOfLines = 0;
-//        for(int i = 0; i < messages.size(); i++)
-//        {
-//            amountOfLines += drawMessage(g, messages.get(i), (amountOfLines*lineHeight + i*heightBetweenMessages) + topOffset);
-//        }
-//
-//    }
     @Override
     public Dimension getPreferredSize()
     {
